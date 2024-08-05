@@ -41,3 +41,33 @@ class AdminController extends Controller
         return view('admin.media');
     }
 }
+
+
+public function users()
+{
+    $users = User::all(); // Fetch all users from the database
+    return view('admin.users', compact('users'));
+}
+
+public function createUser()
+{
+    return view('admin.add_user');
+}
+
+public function storeUser(Request $request)
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    $user = new User;
+    $user->name = $validatedData['name'];
+    $user->email = $validatedData['email'];
+    $user->password = bcrypt($validatedData['password']);
+    $user->save();
+
+    return redirect()->route('admin.users')->with('success', 'User created successfully');
+}
+
